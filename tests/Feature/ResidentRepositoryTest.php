@@ -14,10 +14,10 @@ class ResidentRepositoryTest extends TestCase
     private function makeResident(array $overrides = []): Resident
     {
         return new Resident(array_merge([
-            'first_name' => 'Juan',
-            'last_name' => 'Dela Cruz',
+            'firstName' => 'Juan',
+            'lastName' => 'Dela Cruz',
             'address' => 'Barangay Santo Tomas',
-            'contact_number' => '09171234567',
+            'contactNumber' => '09171234567',
             'email' => 'juan@example.com',
             'status' => 'Active',
         ], $overrides));
@@ -31,7 +31,7 @@ class ResidentRepositoryTest extends TestCase
         $repository->save($resident);
 
         $this->assertDatabaseHas('residents', [
-            'first_name' => 'Juan',
+            'firstName' => 'Juan',
         ]);
     }
 
@@ -67,10 +67,10 @@ class ResidentRepositoryTest extends TestCase
 
         $found = $repository->findById($resident->id);
 
-        $this->assertEquals('Juan', $found->first_name);
-        $this->assertEquals('Dela Cruz', $found->last_name);
+        $this->assertEquals('Juan', $found->firstName);
+        $this->assertEquals('Dela Cruz', $found->lastName);
         $this->assertEquals('Barangay Santo Tomas', $found->address);
-        $this->assertEquals('09171234567', $found->contact_number);
+        $this->assertEquals('09171234567', $found->contactNumber);
         $this->assertEquals('juan@example.com', $found->email);
         $this->assertEquals('Active', $found->status);
     }
@@ -114,11 +114,11 @@ class ResidentRepositoryTest extends TestCase
         $repository = new ResidentRepository();
 
         $resident1 = $this->makeResident([
-            'first_name' => 'Maria',
+            'firstName' => 'Maria',
             'email' => 'maria@example.com',
         ]);
         $resident2 = $this->makeResident([
-            'first_name' => 'Pedro',
+            'firstName' => 'Pedro',
             'email' => 'pedro@example.com',
         ]);
 
@@ -128,8 +128,8 @@ class ResidentRepositoryTest extends TestCase
         $found1 = $repository->findById($resident1->id);
         $found2 = $repository->findById($resident2->id);
 
-        $this->assertEquals('Maria', $found1->first_name);
-        $this->assertEquals('Pedro', $found2->first_name);
+        $this->assertEquals('Maria', $found1->firstName);
+        $this->assertEquals('Pedro', $found2->firstName);
         $this->assertNotEquals($found1->id, $found2->id);
     }
 }
