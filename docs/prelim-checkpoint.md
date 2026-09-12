@@ -24,8 +24,8 @@ I decided to include Laravel timestamps (`created_at` and `updated_at`) in the m
 ## My Migration Design
 
 Migration file: `database/migrations/2026_08_26_112017_create_residents_table.php`
-Primary key design: `$table->id()` — uses Laravel's auto-incrementing unsigned big integer primary key
-Contact number column type: `string` — preserves the leading zero and treats the value as text
+Primary key design: `$table->id()` - uses Laravel's auto-incrementing unsigned big integer primary key
+Contact number column type: `string` - preserves the leading zero and treats the value as text
 Status column type: `string` with a default of `Active`
 Timestamp decision: Included `$table->timestamps()` to follow Laravel Eloquent conventions
 
