@@ -4,23 +4,37 @@ namespace App\Services;
 
 use App\Models\Resident;
 use App\Repositories\ResidentRepository;
-use Illuminate\Validation\ValidationException;
 
 class ResidentRegistrationService
 {
     public function __construct(
         private ResidentValidator $validator,
-        private ResidentRepository $repository,
+        private ResidentRepository $repository
     ) {}
 
-    public function register(Resident $resident): Resident
-    {
-        $validation = $this->validator->validate($resident);
+    public function registerResident(
+        Resident $resident
+    ): ResidentRegistrationResult {
+        $validation =
+            $this->validator->validate(
+                $resident
+            );
 
         if ($validation->fails()) {
-            throw new ValidationException($validation);
+            return ResidentRegistrationResult::failed(
+                $validation
+                    ->errors()
+                    ->keys()
+            );
         }
 
-        return $this->repository->save($resident);
+        $persistedResident =
+            $this->repository->save(
+                $resident
+            );
+
+        return ResidentRegistrationResult::successful(
+            $persistedResident
+        );
     }
 }

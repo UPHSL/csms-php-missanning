@@ -6,121 +6,214 @@ use App\Models\Resident;
 use App\Repositories\ResidentRepository;
 use App\Services\ResidentRegistrationService;
 use App\Services\ResidentValidator;
-use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Validation\ValidationException;
+use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\DB;
 use Tests\TestCase;
 
 class ResidentRegistrationServiceTest extends TestCase
 {
-    use RefreshDatabase;
-
-    private ResidentRegistrationService $service;
-    private ResidentRepository $repository;
+    private string $databasePath;
 
     protected function setUp(): void
     {
         parent::setUp();
-        $this->repository = new ResidentRepository();
-        $this->service = new ResidentRegistrationService(
-            new ResidentValidator(),
-            $this->repository,
+
+        $path = tempnam(
+            sys_get_temp_dir(),
+            'csms_t04_'
+        );
+
+        if ($path === false) {
+            throw new \RuntimeException(
+                'Unable to create temporary SQLite database.'
+            );
+        }
+
+        $this->databasePath = $path;
+
+        config([
+            'database.default' => 'sqlite',
+            'database.connections.sqlite.database' => $this->databasePath,
+        ]);
+
+        DB::purge('sqlite');
+
+        Artisan::call(
+            'migrate:fresh',
+            [
+                '--database' => 'sqlite',
+                '--force' => true,
+            ]
         );
     }
 
-    private function makeResident(array $overrides = []): Resident
+    protected function tearDown(): void
     {
-        return new Resident(array_merge([
+        DB::disconnect('sqlite');
+        DB::purge('sqlite');
+
+        if (
+            isset($this->databasePath)
+            && is_file($this->databasePath)
+        ) {
+            unlink($this->databasePath);
+        }
+
+        parent::tearDown();
+    }
+
+    private function makeValidResident(): Resident
+    {
+        return new Resident([
             'firstName' => 'Juan',
             'lastName' => 'Dela Cruz',
             'address' => 'Barangay Santo Tomas',
             'contactNumber' => '09171234567',
             'email' => 'juan@example.com',
             'status' => 'Active',
-        ], $overrides));
+        ]);
     }
 
-    public function test_valid_resident_can_be_registered(): void
+    private function makeResidentWithMissingFirstName(): Resident
     {
-        $resident = $this->makeResident();
+        return new Resident([
+            'firstName' => '',
+            'lastName' => 'Dela Cruz',
+            'address' => 'Barangay Santo Tomas',
+            'contactNumber' => '09171234567',
+            'email' => 'juan@example.com',
+            'status' => 'Active',
+        ]);
+    }
 
-        $result = $this->service->register($resident);
+    private function makeRegistrationService(): array
+    {
+        $validator = new ResidentValidator;
+        $repository = new ResidentRepository;
+        $service = new ResidentRegistrationService(
+            $validator,
+            $repository
+        );
 
-        $this->assertNotNull($result);
+        return [$service, $repository];
+    }
+
+    public function test_registers_a_valid_resident(): void
+    {
+        [$service] = $this->makeRegistrationService();
+
+        $resident = $this->makeValidResident();
+
+        $result = $service->registerResident($resident);
+
+        $this->assertTrue($result->success);
+        $this->assertNotNull($result->resident);
+        $this->assertSame([], $result->errors);
     }
 
     public function test_registered_resident_receives_an_identifier(): void
     {
-        $resident = $this->makeResident();
+        [$service] = $this->makeRegistrationService();
 
-        $result = $this->service->register($resident);
+        $resident = $this->makeValidResident();
 
-        $this->assertNotNull($result->id);
+        $this->assertNull($resident->id);
+
+        $result = $service->registerResident($resident);
+
+        $this->assertTrue($result->success);
+        $this->assertNotNull($result->resident);
+        $this->assertNotNull($result->resident->id);
     }
 
     public function test_registered_resident_is_persisted(): void
     {
-        $resident = $this->makeResident();
+        [$service, $repository] = $this->makeRegistrationService();
 
-        $result = $this->service->register($resident);
-        $found = $this->repository->findById($result->id);
+        $resident = $this->makeValidResident();
 
-        $this->assertNotNull($found);
+        $result = $service->registerResident($resident);
+
+        $this->assertTrue($result->success);
+        $this->assertNotNull($result->resident);
+
+        $storedResident = $repository->findById($result->resident->id);
+
+        $this->assertNotNull($storedResident);
+        $this->assertSame($result->resident->id, $storedResident->id);
     }
 
     public function test_registered_resident_information_is_preserved(): void
     {
-        $resident = $this->makeResident();
+        [$service, $repository] = $this->makeRegistrationService();
 
-        $result = $this->service->register($resident);
-        $found = $this->repository->findById($result->id);
+        $resident = $this->makeValidResident();
 
-        $this->assertEquals('Juan', $found->firstName);
-        $this->assertEquals('Dela Cruz', $found->lastName);
-        $this->assertEquals('Barangay Santo Tomas', $found->address);
-        $this->assertEquals('09171234567', $found->contactNumber);
-        $this->assertEquals('juan@example.com', $found->email);
-        $this->assertEquals('Active', $found->status);
+        $result = $service->registerResident($resident);
+
+        $storedResident = $repository->findById($result->resident->id);
+
+        $this->assertNotNull($storedResident);
+        $this->assertSame('Juan', $storedResident->firstName);
+        $this->assertSame('Dela Cruz', $storedResident->lastName);
+        $this->assertSame('Barangay Santo Tomas', $storedResident->address);
+        $this->assertSame('09171234567', $storedResident->contactNumber);
+        $this->assertSame('juan@example.com', $storedResident->email);
+        $this->assertSame('Active', $storedResident->status);
     }
 
-    public function test_default_active_status_is_preserved(): void
+    public function test_registration_preserves_default_active_status(): void
     {
-        $resident = $this->makeResident();
+        [$service] = $this->makeRegistrationService();
 
-        $result = $this->service->register($resident);
-        $found = $this->repository->findById($result->id);
+        $resident = $this->makeValidResident();
 
-        $this->assertEquals('Active', $found->status);
+        $this->assertSame('Active', $resident->status);
+
+        $result = $service->registerResident($resident);
+
+        $this->assertTrue($result->success);
+        $this->assertSame('Active', $result->resident->status);
     }
 
     public function test_invalid_resident_registration_fails(): void
     {
-        $resident = $this->makeResident(['firstName' => '']);
+        [$service] = $this->makeRegistrationService();
 
-        $this->expectException(ValidationException::class);
+        $resident = $this->makeResidentWithMissingFirstName();
 
-        $this->service->register($resident);
+        $result = $service->registerResident($resident);
+
+        $this->assertFalse($result->success);
+        $this->assertNull($result->resident);
+        $this->assertNotEmpty($result->errors);
     }
 
     public function test_invalid_resident_is_not_persisted(): void
     {
-        $resident = $this->makeResident(['firstName' => '']);
+        [$service] = $this->makeRegistrationService();
 
-        try {
-            $this->service->register($resident);
-        } catch (ValidationException) {}
+        $resident = $this->makeResidentWithMissingFirstName();
 
-        $this->assertDatabaseMissing('residents', ['email' => 'juan@example.com']);
+        $countBefore = DB::table('residents')->count();
+
+        $result = $service->registerResident($resident);
+
+        $countAfter = DB::table('residents')->count();
+
+        $this->assertFalse($result->success);
+        $this->assertSame($countBefore, $countAfter);
     }
 
-    public function test_validation_failure_identifies_the_invalid_field(): void
+    public function test_registration_identifies_validation_failure(): void
     {
-        $resident = $this->makeResident(['firstName' => '']);
+        [$service] = $this->makeRegistrationService();
 
-        try {
-            $this->service->register($resident);
-            $this->fail('Expected ValidationException was not thrown.');
-        } catch (ValidationException $e) {
-            $this->assertArrayHasKey('first_name', $e->errors());
-        }
+        $resident = $this->makeResidentWithMissingFirstName();
+
+        $result = $service->registerResident($resident);
+
+        $this->assertFalse($result->success);
+        $this->assertContains('first_name', $result->errors);
     }
 }
