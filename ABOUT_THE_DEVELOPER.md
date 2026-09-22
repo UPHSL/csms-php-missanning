@@ -1,27 +1,54 @@
 # About the Developer
 
-Complete this file during Sprint 0 - Developer Onboarding.
+Complete this document during Developer Onboarding.
+
+This file identifies the student responsible for this repository throughout the semester.
+
+## Developer Information
 
 **Full Name:**  
-Jullie Anne A. Temporosa
+Enter your full name here.
 
 **Student Number:**  
-C23-1927-616
+Enter your student number here.
+
+**Program / Course:**  
+Enter your program or course here.
 
 **Section:**  
-J4A
+Enter your section here.
 
 **GitHub Username:**  
-missanning
+Enter your GitHub username here.
 
-**Primary Technology Stack:**  
-PHP with Laravel
+## Primary Technology
+
+**Programming Language:** PHP
+
+**Framework:** Laravel
+
+## Development Environment
 
 **Operating System:**  
-Microsoft Windows
+Windows / macOS / Linux
+
+**Primary IDE or Editor:**  
+Enter your IDE or editor here.
 
 **PHP Version:**  
-PHP 8.2.31
+Enter the output version from `php -v`.
 
-```text
-php -v
+**Composer Version:**  
+Enter your Composer version.
+
+## Developer Statement
+
+I understand that this repository represents my individual development work for the semester.
+
+I am responsible for understanding the code, tests, commits, branches, and technical decisions submitted through this repository.
+
+**Developer Name:**  
+Enter your name here.
+
+**Date Completed:**  
+Enter the date here.
