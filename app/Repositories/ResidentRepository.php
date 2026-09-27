@@ -19,29 +19,52 @@ class ResidentRepository
         return Resident::find($id);
     }
 
-    public function listResidents(): Collection
+    public function findAll(): Collection
     {
-        return Resident::orderBy('lastName')
-            ->orderBy('firstName')
-            ->orderBy('id')
+        return Resident::query()
+            ->orderByRaw(
+                'LOWER(lastName) ASC'
+            )
+            ->orderByRaw(
+                'LOWER(firstName) ASC'
+            )
+            ->orderBy(
+                'id',
+                'asc'
+            )
             ->get();
     }
 
-    public function searchByName(string $term): Collection
-    {
-        $term = trim($term);
+    public function searchByName(
+        string $searchTerm
+    ): Collection {
+        $pattern =
+            '%'.$searchTerm.'%';
 
-        if ($term === '') {
-            return $this->listResidents();
-        }
-
-        return Resident::where(function ($query) use ($term) {
-            $query->whereRaw('LOWER(lastName) LIKE ?', ['%'.strtolower($term).'%'])
-                ->orWhereRaw('LOWER(firstName) LIKE ?', ['%'.strtolower($term).'%']);
-        })
-            ->orderBy('lastName')
-            ->orderBy('firstName')
-            ->orderBy('id')
+        return Resident::query()
+            ->where(
+                function ($query) use ($pattern) {
+                    $query
+                        ->whereRaw(
+                            'LOWER(firstName) LIKE LOWER(?)',
+                            [$pattern]
+                        )
+                        ->orWhereRaw(
+                            'LOWER(lastName) LIKE LOWER(?)',
+                            [$pattern]
+                        );
+                }
+            )
+            ->orderByRaw(
+                'LOWER(lastName) ASC'
+            )
+            ->orderByRaw(
+                'LOWER(firstName) ASC'
+            )
+            ->orderBy(
+                'id',
+                'asc'
+            )
             ->get();
     }
 }
