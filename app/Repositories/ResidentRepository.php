@@ -34,6 +34,12 @@ class ResidentRepository
             )
             ->get();
     }
+    public function update(Resident $resident): Resident
+    {
+        $resident->save();
+
+        return $resident;
+    }
 
     public function searchByName(
         string $searchTerm
