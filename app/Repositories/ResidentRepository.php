@@ -41,6 +41,21 @@ class ResidentRepository
         return $resident;
     }
 
+    public function deactivateById(int $id): ?Resident
+    {
+        $resident = $this->findById($id);
+
+        if ($resident === null) {
+            return null;
+        }
+
+        $resident->status = 'Inactive';
+        $resident->save();
+
+        return $resident;
+    }
+
+
     public function searchByName(
         string $searchTerm
     ): Collection {
