@@ -94,4 +94,34 @@ class ServiceRequestRepositoryTest extends TestCase
             Schema::getColumnListing('service_requests'),
         );
     }
+    public function test_update_status_changes_only_the_persisted_status(): void
+    {
+        $resident = $this->resident();
+        $request = $this->request($resident->id);
+        $repository = new ServiceRequestRepository;
+
+        $saved = $repository->save($request);
+
+        $updated = $repository->updateStatus(
+            $saved->id,
+            ServiceRequest::STATUS_IN_PROGRESS
+        );
+
+        $this->assertNotNull($updated);
+        $this->assertSame($saved->id, $updated->id);
+        $this->assertSame($resident->id, $updated->residentId);
+        $this->assertSame('Barangay Clearance', $updated->serviceType);
+        $this->assertSame('Request for employment requirement', $updated->description);
+        $this->assertSame('2026-09-15', $updated->dateRequested);
+        $this->assertSame(ServiceRequest::STATUS_IN_PROGRESS, $updated->status);
+
+        $this->assertDatabaseHas('service_requests', [
+            'id' => $saved->id,
+            'resident_id' => $resident->id,
+            'service_type' => 'Barangay Clearance',
+            'description' => 'Request for employment requirement',
+            'date_requested' => '2026-09-15',
+            'status' => ServiceRequest::STATUS_IN_PROGRESS,
+        ]);
+    }
 }
