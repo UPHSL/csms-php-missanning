@@ -43,4 +43,17 @@ class ServiceRequestRepository
 
         return $request;
     }
+
+    public function updateStatus(int $id, string $status): ?ServiceRequest
+    {
+        $updated = DB::table('service_requests')
+            ->where('id', $id)
+            ->update(['status' => $status]);
+
+        if ($updated === 0) {
+            return null;
+        }
+
+        return $this->findById($id);
+    }
 }
