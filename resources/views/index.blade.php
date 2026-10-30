@@ -76,6 +76,22 @@
             font-weight: 700;
             font-size: 1.05rem;
         }
+
+        .resident-link {
+            display: inline-block;
+            margin-top: 24px;
+            padding: 12px 18px;
+            border-radius: 8px;
+            background: #116957;
+            color: white;
+            font-weight: 700;
+            text-decoration: none;
+        }
+
+        .resident-link:focus-visible {
+            outline: 3px solid #d49b48;
+            outline-offset: 3px;
+        }
     </style>
 </head>
 
@@ -117,6 +133,14 @@
     <p class="status">
         Environment status: Ready
     </p>
+
+    <a class="resident-link" href="{{ route('residents.index') }}">
+        Open Resident Management
+    </a>
+
+    <a class="resident-link" href="{{ route('service-requests.index') }}">
+        Open Service Request Management
+    </a>
 
 </div>
 
