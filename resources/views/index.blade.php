@@ -138,6 +138,10 @@
         Open Resident Management
     </a>
 
+    <a class="resident-link" href="{{ route('service-requests.index') }}">
+        Open Service Request Management
+    </a>
+
 </div>
 
 </body>
