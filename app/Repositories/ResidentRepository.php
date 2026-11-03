@@ -75,19 +75,19 @@ class ResidentRepository
     public function searchByName(
         string $searchTerm
     ): Collection {
-        $pattern =
-            '%'.$searchTerm.'%';
+        $escapedTerm = str_replace(['!', '%', '_'], ['!!', '!%', '!_'], $searchTerm);
+        $pattern = '%'.$escapedTerm.'%';
 
         return Resident::query()
             ->where(
                 function ($query) use ($pattern) {
                     $query
                         ->whereRaw(
-                            'LOWER(firstName) LIKE LOWER(?)',
+                            "LOWER(firstName) LIKE LOWER(?) ESCAPE '!'",
                             [$pattern]
                         )
                         ->orWhereRaw(
-                            'LOWER(lastName) LIKE LOWER(?)',
+                            "LOWER(lastName) LIKE LOWER(?) ESCAPE '!'",
                             [$pattern]
                         );
                 }
