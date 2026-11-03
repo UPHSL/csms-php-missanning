@@ -97,7 +97,7 @@ Missing Service Request IDs and malformed Resident path IDs displayed controlled
 | Generated build/runtime artifacts | PASS | No tracked log, SQLite, vendor, node_modules, or build output files found. |
 | Accidental local database files | PASS | No SQLite database is tracked. |
 | Commented-out abandoned code | PASS | No abandoned implementation block identified during the reviewed T15 paths. |
-| Secrets/credentials | PASS for tracked repository files | No token-like secret found in tracked source. The local `origin` URL now contains no embedded credential, Git Credential Manager is configured, and the developer reports running GitHub's targeted token revocation command. |
+| Secrets/credentials | PASS for tracked repository files | No token-like secret found in tracked source. The local Git remote configuration is outside the repository change set and should use a credential manager rather than an embedded token. |
 | Broken navigation/links | PASS | Main module links and recent-request details links worked in the browser. |
 | Direct SQL parameter binding | PASS | Search values are bound as parameters; Dashboard counts remain database-level aggregate queries. |
 
@@ -105,7 +105,7 @@ An unrelated untracked local tool directory was intentionally left outside the T
 
 ## 8. Known Limitations
 
-No known release-blocking limitations identified within the defined CSMS scope.
+No known release-blocking application defect was identified within the defined CSMS scope. The local Git remote credential should also be rotated and replaced with a credential-manager configuration.
 
 ## 9. Release Candidate Statement
 
