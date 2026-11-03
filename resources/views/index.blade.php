@@ -134,6 +134,10 @@
         Environment status: Ready
     </p>
 
+    <a class="resident-link" href="{{ route('dashboard.index') }}">
+        Open CSMS Dashboard
+    </a>
+
     <a class="resident-link" href="{{ route('residents.index') }}">
         Open Resident Management
     </a>
