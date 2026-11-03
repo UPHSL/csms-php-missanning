@@ -3,11 +3,36 @@
 namespace App\Repositories;
 
 use App\Models\ServiceRequest;
+use Illuminate\Database\Query\Builder;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 
 class ServiceRequestRepository
 {
+    public function countAll(): int
+    {
+        return DB::table('service_requests')->count();
+    }
+
+    public function countByStatus(): array
+    {
+        return DB::table('service_requests')
+            ->select('status')
+            ->selectRaw('COUNT(*) as aggregate')
+            ->groupBy('status')
+            ->pluck('aggregate', 'status')
+            ->map(fn ($count): int => (int) $count)
+            ->all();
+    }
+
+    public function findRecent(int $limit): Collection
+    {
+        return $this->orderedQuery(DB::table('service_requests'))
+            ->limit($limit)
+            ->get()
+            ->map(fn (object $row): ServiceRequest => $this->fromRow($row));
+    }
+
     public function save(ServiceRequest $request): ServiceRequest
     {
         if ($request->id !== null) {
@@ -55,10 +80,15 @@ class ServiceRequestRepository
             $query->where('status', $statusFilter);
         }
 
-        return $query->orderBy('date_requested', 'desc')
-            ->orderBy('id', 'desc')
+        return $this->orderedQuery($query)
             ->get()
             ->map(fn (object $row): ServiceRequest => $this->fromRow($row));
+    }
+
+    private function orderedQuery(Builder $query): Builder
+    {
+        return $query->orderBy('date_requested', 'desc')
+            ->orderBy('id', 'desc');
     }
 
     private function fromRow(object $row): ServiceRequest

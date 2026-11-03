@@ -14,10 +14,7 @@
                 <span class="brand__mark" aria-hidden="true">CS</span>
                 <span class="brand__text">Community Services<br><strong>Management System</strong></span>
             </a>
-            <nav class="site-nav" aria-label="Management pages">
-                <a href="{{ route('residents.index') }}">Residents</a>
-                <a href="{{ route('service-requests.index') }}" aria-current="page">Service Requests</a>
-            </nav>
+            @include('partials.management-nav', ['current' => 'service-requests'])
         </div>
     </header>
 

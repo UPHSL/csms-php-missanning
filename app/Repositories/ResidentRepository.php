@@ -7,6 +7,22 @@ use Illuminate\Database\Eloquent\Collection;
 
 class ResidentRepository
 {
+    public function countAll(): int
+    {
+        return Resident::query()->count();
+    }
+
+    public function countByStatus(): array
+    {
+        return Resident::query()
+            ->select('status')
+            ->selectRaw('COUNT(*) as aggregate')
+            ->groupBy('status')
+            ->pluck('aggregate', 'status')
+            ->map(fn ($count): int => (int) $count)
+            ->all();
+    }
+
     public function save(Resident $resident): Resident
     {
         $resident->save();
