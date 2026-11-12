@@ -2,4 +2,5 @@
     <a href="{{ route('dashboard.index') }}" @if ($current === 'dashboard') aria-current="page" @endif>Dashboard</a>
     <a href="{{ route('residents.index') }}" @if ($current === 'residents') aria-current="page" @endif>Residents</a>
     <a href="{{ route('service-requests.index') }}" @if ($current === 'service-requests') aria-current="page" @endif>Service Requests</a>
+    <span class="site-nav__version">v{{ config('app.release_version') }}</span>
 </nav>

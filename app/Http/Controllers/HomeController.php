@@ -10,9 +10,9 @@ class HomeController extends Controller
     {
         return view('index', [
             'application' => 'Community Services Management System',
-            'sprint' => 'Sprint 0 - Developer Onboarding',
+            'sprint' => 'Sprint 6 - Final Release',
             'technology' => 'PHP with Laravel',
-            'version' => '0.1.0',
+            'version' => config('app.release_version'),
         ]);
     }
 }
